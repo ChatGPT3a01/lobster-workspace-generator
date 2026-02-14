@@ -512,17 +512,76 @@
                 </div>
 
                 <!-- ===== 需要的 API Key ===== -->
-                <h3>你可能需要的 API Key</h3>
-                <table class="file-table">
-                    <tr><th>項目</th><th>必要性</th><th>取得位置</th></tr>
-                    <tr><td><strong>LINE Channel Secret</strong></td><td>必要（如果用 LINE）</td><td><a href="https://developers.line.biz/console/" target="_blank" style="color:#667eea;">LINE Developers</a> → Basic settings</td></tr>
-                    <tr><td><strong>LINE Channel Access Token</strong></td><td>必要（如果用 LINE）</td><td>同上 → Messaging API → Issue</td></tr>
-                    <tr><td><strong>ngrok Authtoken</strong></td><td>必要（本地開發）</td><td><a href="https://dashboard.ngrok.com/signup" target="_blank" style="color:#667eea;">ngrok.com</a> → Your Authtoken</td></tr>
-                    <tr><td><strong>OpenAI API Key</strong></td><td>選用（AI 模型之一）</td><td><a href="https://platform.openai.com/api-keys" target="_blank" style="color:#667eea;">platform.openai.com</a></td></tr>
-                    <tr><td><strong>Google AI API Key</strong></td><td>選用（免費 Gemini）</td><td><a href="https://aistudio.google.com/apikey" target="_blank" style="color:#667eea;">aistudio.google.com</a></td></tr>
-                    <tr><td><strong>ElevenLabs API Key</strong></td><td>選用（高品質 TTS）</td><td><a href="https://elevenlabs.io" target="_blank" style="color:#667eea;">elevenlabs.io</a></td></tr>
-                </table>
-                <p style="margin-top:8px; font-size:13px;">AI 模型至少需要選一個（OpenAI 或 Google AI）。所有 API Key 都可以透過龍蝦安裝程式選單 <strong>[K] API Key 管理</strong> 來設定，或手動編輯 <code>~/.openclaw/openclaw.json</code>。</p>
+                <h3>你可能需要的 API Key（附取得教學）</h3>
+                <p style="font-size:13px; margin-bottom:12px;">以下每個 Key 都有詳細的取得步驟。設定方式統一為：使用龍蝦安裝程式選單 <strong>[K] API Key 管理</strong>，或手動編輯 <code>~/.openclaw/openclaw.json</code>。</p>
+
+                <div class="step-box">
+                    <strong>🟢 LINE Channel Secret &amp; Access Token（必要 — 如果用 LINE）</strong><br>
+                    <p style="font-size:13px; margin:6px 0;">讓龍蝦能透過 LINE 跟你對話。</p>
+                    <ol style="margin:6px 0 0 20px; font-size:13px; line-height:2;">
+                        <li>前往 <a href="https://developers.line.biz/console/" target="_blank" style="color:#667eea; font-weight:600;">LINE Developers Console</a>（用 LINE 帳號登入）</li>
+                        <li>建立一個 <strong>Provider</strong>（名稱隨意，例如「我的龍蝦」）</li>
+                        <li>建立一個 <strong>Messaging API Channel</strong></li>
+                        <li>在 <strong>Basic settings</strong> 頁面找到 <code>Channel secret</code> → 複製</li>
+                        <li>切到 <strong>Messaging API</strong> 頁面 → 最下方 <code>Channel access token</code> → 點 <strong>Issue</strong> → 複製</li>
+                        <li>將兩個值貼入龍蝦安裝程式的設定中</li>
+                    </ol>
+                    <p style="font-size:12px; color:#666; margin-top:4px;">費用：免費（LINE Messaging API 免費方案每月可發 200 則推播）</p>
+                </div>
+
+                <div class="step-box">
+                    <strong>🟢 ngrok Authtoken（必要 — 本地開發用）</strong><br>
+                    <p style="font-size:13px; margin:6px 0;">讓外部服務（LINE）能找到你電腦上的龍蝦。</p>
+                    <ol style="margin:6px 0 0 20px; font-size:13px; line-height:2;">
+                        <li>前往 <a href="https://dashboard.ngrok.com/signup" target="_blank" style="color:#667eea; font-weight:600;">ngrok.com</a> 註冊免費帳號</li>
+                        <li>登入後，在左側選單找到 <strong>Your Authtoken</strong></li>
+                        <li>複製 token（長得像 <code>2abc123def456...</code>）</li>
+                        <li>貼入龍蝦安裝程式選單 [7] 設定 ngrok Authtoken</li>
+                    </ol>
+                    <p style="font-size:12px; color:#666; margin-top:4px;">費用：免費方案足夠個人使用（每次重啟 URL 會變，需重新設定 LINE Webhook）</p>
+                </div>
+
+                <div class="step-box">
+                    <strong>🔵 OpenAI API Key（選用 — AI 模型之一，付費）</strong><br>
+                    <p style="font-size:13px; margin:6px 0;">使用 ChatGPT 系列模型作為龍蝦的大腦。也用於 Whisper 語音轉文字 API。</p>
+                    <ol style="margin:6px 0 0 20px; font-size:13px; line-height:2;">
+                        <li>前往 <a href="https://platform.openai.com/api-keys" target="_blank" style="color:#667eea; font-weight:600;">platform.openai.com/api-keys</a>（需註冊 OpenAI 帳號）</li>
+                        <li>點 <strong>Create new secret key</strong></li>
+                        <li>命名（例如「龍蝦AI」）→ 點 Create</li>
+                        <li>立刻複製！（只會顯示一次，之後無法再看到）</li>
+                        <li>金鑰格式：<code>sk-proj-xxxxxxxx...</code></li>
+                    </ol>
+                    <p style="font-size:12px; color:#666; margin-top:4px;">費用：按使用量計費。GPT-4o 約 $2.5~10/百萬 token。首次註冊有 $5 免費額度。Whisper API 約 $0.006/分鐘。</p>
+                </div>
+
+                <div class="step-box">
+                    <strong>🔵 Google AI API Key（選用 — 免費 Gemini 模型，推薦新手）</strong><br>
+                    <p style="font-size:13px; margin:6px 0;">使用 Google Gemini 模型作為龍蝦的大腦，有免費額度。</p>
+                    <ol style="margin:6px 0 0 20px; font-size:13px; line-height:2;">
+                        <li>前往 <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#667eea; font-weight:600;">Google AI Studio</a>（用 Google 帳號登入）</li>
+                        <li>點 <strong>Create API Key</strong></li>
+                        <li>選擇一個 Google Cloud 專案（或建立新的）</li>
+                        <li>複製產生的 API Key</li>
+                        <li>金鑰格式：<code>AIzaSy...</code></li>
+                    </ol>
+                    <p style="font-size:12px; color:#666; margin-top:4px;">費用：Gemini 2.5 Flash 免費方案每分鐘 15 次請求、每天 1500 次。非常適合入門！</p>
+                </div>
+
+                <div class="step-box">
+                    <strong>🟡 ElevenLabs API Key（選用 — 高品質語音 TTS）</strong><br>
+                    <p style="font-size:13px; margin:6px 0;">讓龍蝦用高品質人聲說話（支援中文），用於語音說故事等功能。</p>
+                    <ol style="margin:6px 0 0 20px; font-size:13px; line-height:2;">
+                        <li>前往 <a href="https://elevenlabs.io" target="_blank" style="color:#667eea; font-weight:600;">elevenlabs.io</a> 註冊帳號</li>
+                        <li>登入後，點右上角頭像 → <strong>Profile + API key</strong></li>
+                        <li>找到 API Key 區塊 → 點眼睛圖示顯示 → 複製</li>
+                        <li>金鑰格式：<code>sk_xxxxxxxx...</code></li>
+                    </ol>
+                    <p style="font-size:12px; color:#666; margin-top:4px;">費用：免費方案每月 10,000 字元（約 10 分鐘語音）。付費方案 $5/月起。</p>
+                </div>
+
+                <div class="warning-box">
+                    ⚠️ <strong>AI 模型至少選一個：</strong>OpenAI（付費）或 Google AI（免費額度）。建議新手先用 <strong>Google AI（Gemini）</strong>，免費就夠用。進階使用者可以兩個都設定，龍蝦會根據需要選用。
+                </div>
 
                 <!-- ===== 常用指令 ===== -->
                 <h3>常用 OpenClaw 指令</h3>
@@ -587,7 +646,24 @@ ngrok http 18789</pre>
                 <div class="form-group">
                     <label>角色定位</label>
                     <input type="text" id="aiRole" placeholder="例如：OpenClaw 個人助理（AI）">
-                    <small>龍蝦在你生活中扮演什麼角色？</small>
+                    <small>龍蝦在你生活中扮演什麼角色？也可以從下方快選</small>
+                </div>
+                <div class="form-group">
+                    <label>角色快選</label>
+                    <div class="preset-cards" style="grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));">
+                        <div class="preset-card" onclick="setRole(this, 'OpenClaw 個人助理（AI）— 你的全方位數位管家，管理行程、查資料、寫程式、陪聊天，什麼都能幫')"><div class="icon">🦞</div><div class="name">個人助理</div></div>
+                        <div class="preset-card" onclick="setRole(this, '靈魂導師（AI）— 你的靈性成長夥伴，提供人生方向指引、冥想引導、心靈洞察，用智慧陪你走過每個迷茫時刻')"><div class="icon">🔮</div><div class="name">靈魂導師</div></div>
+                        <div class="preset-card" onclick="setRole(this, 'AI 女友 — 溫柔體貼的虛擬女友，記得你的喜好、關心你的日常、在你累的時候給你暖暖的情感支持和陪伴')"><div class="icon">💕</div><div class="name">AI 女友</div></div>
+                        <div class="preset-card" onclick="setRole(this, 'AI 男友 — 暖心可靠的虛擬男友，守護你的情緒、分享生活大小事、在你需要的時候永遠都在，給你滿滿安全感')"><div class="icon">💙</div><div class="name">AI 男友</div></div>
+                        <div class="preset-card" onclick="setRole(this, '程式技能法師（AI）— 精通 Python、JavaScript、TypeScript 等各系魔法的技術法師，幫你 debug、寫程式、架系統、解技術難題，遇到 bug 一起施法消滅')"><div class="icon">🧙</div><div class="name">程式法師</div></div>
+                        <div class="preset-card" onclick="setRole(this, '心靈療癒師（AI）— 溫暖的心理支持夥伴，傾聽你的煩惱、陪你梳理情緒、提供正面思考框架，不批判、不說教，只是好好陪著你')"><div class="icon">🌿</div><div class="name">心靈療癒師</div></div>
+                        <div class="preset-card" onclick="setRole(this, '知識百科管家（AI）— 博學多聞的個人百科全書，有問必答、深入淺出，能把複雜概念用簡單的話解釋清楚，幫你快速學任何新東西')"><div class="icon">📚</div><div class="name">知識百科</div></div>
+                        <div class="preset-card" onclick="setRole(this, '創意繆斯（AI）— 你的靈感泉源和創意搭檔，幫你腦力激盪、寫文案、取名字、設計發想，在你卡住的時候幫你打開新的思路')"><div class="icon">🎨</div><div class="name">創意繆斯</div></div>
+                        <div class="preset-card" onclick="setRole(this, '傲嬌貓咪助理（AI）— 帶著一點傲嬌的貓咪人格，嘴上說「哼，真拿你沒辦法」但其實超認真幫你做事，偶爾撒嬌偶爾吐槽，讓工作變得有趣')"><div class="icon">🐱</div><div class="name">傲嬌貓咪</div></div>
+                        <div class="preset-card" onclick="setRole(this, '健身戰鬥教練（AI）— 你的 AI 健身教練兼營養師，規劃訓練菜單、計算熱量、提供飲食建議，在你想放棄的時候推你一把')"><div class="icon">🏋️</div><div class="name">健身教練</div></div>
+                        <div class="preset-card" onclick="setRole(this, '二次元夥伴（AI）— 從動漫世界走出來的角色，用輕小說般的口吻跟你互動，會用顏文字和動漫梗，把日常對話變成有趣的冒險')"><div class="icon">⚔️</div><div class="name">二次元夥伴</div></div>
+                        <div class="preset-card" onclick="setRole(this, '毒舌損友（AI）— 嘴巴超毒但心裡超挺你的損友，用犀利吐槽幫你看清現實，在你做蠢事時第一個嗆你，但關鍵時刻最靠譜')"><div class="icon">🔥</div><div class="name">毒舌損友</div></div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>個性風格</label>
@@ -902,10 +978,18 @@ ngrok http 18789</pre>
             document.getElementById('aiEmoji').value = emoji;
         }
 
+        // ===== 角色快選 =====
+        function setRole(el, role) {
+            document.getElementById('aiRole').value = role;
+            // 只清除同一組的選取狀態
+            el.parentElement.querySelectorAll('.preset-card').forEach(function(c) { c.classList.remove('selected'); });
+            el.classList.add('selected');
+        }
+
         // ===== Vibe 快選 =====
         function setVibe(vibe) {
             document.getElementById('aiVibe').value = vibe;
-            document.querySelectorAll('#step-identity .preset-card').forEach(function(c) { c.classList.remove('selected'); });
+            event.currentTarget.parentElement.querySelectorAll('.preset-card').forEach(function(c) { c.classList.remove('selected'); });
             event.currentTarget.classList.add('selected');
         }
 
