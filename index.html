@@ -345,51 +345,216 @@
                 <h2>📖 使用教學</h2>
 
                 <h3>這是什麼？</h3>
-                <p>此工具幫你生成 <strong>OpenClaw 龍蝦AI</strong> 的 Workspace 人格模板，包含 6 個核心設定檔。生成後，將這些檔案放入你的 OpenClaw workspace 目錄，龍蝦就會擁有你設定的人格、行為風格和記憶系統。</p>
-
-                <h3>生成的檔案說明</h3>
-                <table class="file-table">
-                    <tr><th>檔案</th><th>用途</th><th>說明</th></tr>
-                    <tr><td><code>IDENTITY.md</code></td><td>身份設定</td><td>名稱、角色、個性風格、代表 Emoji</td></tr>
-                    <tr><td><code>SOUL.md</code></td><td>靈魂設定</td><td>行為準則、核心信念、溝通風格</td></tr>
-                    <tr><td><code>USER.md</code></td><td>使用者資訊</td><td>你的名字、稱呼、時區、語言</td></tr>
-                    <tr><td><code>AGENTS.md</code></td><td>代理人規範</td><td>記憶系統、安全原則、群組聊天</td></tr>
-                    <tr><td><code>TOOLS.md</code></td><td>工具筆記</td><td>TTS 偏好、裝置設定、環境備忘</td></tr>
-                    <tr><td><code>HEARTBEAT.md</code></td><td>心跳排程</td><td>定期檢查任務清單</td></tr>
-                </table>
-
-                <h3>使用步驟</h3>
-                <div class="step-box"><span class="step-num">1</span><strong>填寫設定</strong> — 依序填寫龍蝦的身份、靈魂、使用者資訊等各項設定。也可直接點「載入範例」快速體驗。</div>
-                <div class="step-box"><span class="step-num">2</span><strong>一鍵生成</strong> — 按下「生成我的龍蝦」按鈕，系統會產出你的「龍蝦人格名片」和全部設定檔。</div>
-                <div class="step-box"><span class="step-num">3</span><strong>下載檔案</strong> — 點擊綠色下載按鈕，6 個檔案會自動下載。</div>
-                <div class="step-box"><span class="step-num">4</span><strong>放入 Workspace</strong> — 將下載的 .md 檔案放到你的 OpenClaw workspace 目錄。</div>
-
-                <h3>檔案放置位置</h3>
-                <div class="step-box">
-                    <code>C:\Users\你的使用者名稱\.openclaw\workspace\</code><br><br>
-                    <pre style="font-size:13px; line-height:1.6; color:#333;">workspace/
-├── IDENTITY.md
-├── SOUL.md
-├── USER.md
-├── AGENTS.md
-├── TOOLS.md
-├── HEARTBEAT.md
-├── memory/
-│   └── (日誌會自動產生)
-└── skills/
-    └── (技能包目錄)</pre>
-                </div>
+                <p>此工具幫你生成 <strong>OpenClaw 龍蝦AI</strong> 的 Workspace 人格模板。OpenClaw 是一個開源的個人 AI 助理框架，透過 <code>workspace/</code> 資料夾中的 .md 檔案來定義 AI 的人格、行為和能力。</p>
+                <p style="margin-top:8px;">這個生成器會幫你產出 <strong>6 個核心設定檔</strong>，下載後放進 workspace 目錄，你的龍蝦 AI 就能擁有你設計的人格。</p>
 
                 <div class="warning-box">
-                    ⚠️ <strong>注意：</strong>如果 workspace 已有這些檔案，下載後放入會覆蓋原有內容。建議先備份。
+                    ⚠️ <strong>前提：</strong>使用此工具前，你需要先安裝好 OpenClaw。如果還沒安裝，請先使用「龍蝦自動安裝程式」完成安裝（含 Node.js、OpenClaw、LINE 插件等）。
                 </div>
 
+                <!-- ===== 快速使用步驟 ===== -->
+                <h3>快速使用步驟</h3>
+                <div class="step-box"><span class="step-num">1</span><strong>填寫設定</strong> — 點下方 6 個 Tab（身份→靈魂→使用者→代理人→工具→心跳），依序填寫。也可點「載入範例」快速體驗。</div>
+                <div class="step-box"><span class="step-num">2</span><strong>生成龍蝦</strong> — 按下底部的「🦞 生成我的龍蝦」按鈕。</div>
+                <div class="step-box"><span class="step-num">3</span><strong>下載檔案</strong> — 在彈出的人格名片上點擊綠色「📦 下載全部檔案」按鈕，6 個 .md 檔會自動下載。</div>
+                <div class="step-box"><span class="step-num">4</span><strong>放入 Workspace</strong> — 把下載的檔案放到你的 OpenClaw workspace 目錄（見下方路徑）。</div>
+                <div class="step-box"><span class="step-num">5</span><strong>重啟 OpenClaw</strong> — 執行 <code>openclaw gateway restart</code>，龍蝦就會載入新的人格設定。</div>
+
+                <!-- ===== 檔案放置 ===== -->
+                <h3>檔案放置位置</h3>
+                <div class="step-box">
+                    <strong>Windows：</strong><code>C:\Users\你的使用者名稱\.openclaw\workspace\</code><br>
+                    <strong>Mac/Linux：</strong><code>~/.openclaw/workspace/</code><br><br>
+                    <pre style="font-size:13px; line-height:1.6; color:#333;">workspace/
+├── IDENTITY.md    ← 龍蝦的名字和角色
+├── SOUL.md        ← 行為準則和靈魂
+├── USER.md        ← 你（使用者）的資訊
+├── AGENTS.md      ← 記憶系統和安全規則
+├── TOOLS.md       ← 工具偏好和環境設定
+├── HEARTBEAT.md   ← 定期檢查排程
+├── memory/        ← 記憶系統（自動產生）
+│   └── YYYY-MM-DD.md
+└── skills/        ← 技能包目錄
+    └── (由 clawdhub 安裝)</pre>
+                </div>
+                <div class="warning-box">
+                    ⚠️ 如果 workspace 已有這些檔案，下載放入會<strong>覆蓋</strong>原有內容。建議先備份：<br>
+                    <code style="display:block; margin-top:5px;">copy *.md backup/</code>
+                </div>
+
+                <!-- ===== 6 個檔案詳細說明 ===== -->
+                <h3>6 個設定檔詳細說明</h3>
+
+                <div class="step-box">
+                    <strong>🦞 IDENTITY.md — 身份設定（Tab：身份）</strong><br>
+                    龍蝦的「身份證」。定義名字、角色、個性風格和代表 Emoji。<br>
+                    <ul style="margin:8px 0 0 20px; font-size:13px;">
+                        <li><strong>龍蝦名稱</strong> — 你想叫 AI 什麼名字（例如「亮的龍蝦」）</li>
+                        <li><strong>角色定位</strong> — 龍蝦在你生活中的角色（例如「個人助理」「程式碼審查員」）</li>
+                        <li><strong>個性風格</strong> — 說話的感覺，可用快選卡片一鍵帶入</li>
+                        <li><strong>代表 Emoji</strong> — 龍蝦在對話中使用的代表 emoji</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <strong>💫 SOUL.md — 靈魂設定（Tab：靈魂）</strong><br>
+                    龍蝦最重要的檔案！定義「價值觀」和行為準則。<br>
+                    <ul style="margin:8px 0 0 20px; font-size:13px;">
+                        <li><strong>核心行為準則</strong> — 5 個預設準則，勾選你想要的（建議全勾）</li>
+                        <li><strong>自訂準則</strong> — 加入你獨有的規則（例如「回答時優先用中文」）</li>
+                        <li><strong>溝通風格</strong> — 描述龍蝦應該怎麼跟你聊天</li>
+                        <li><strong>邊界規則</strong> — 龍蝦不應該做的事（隱私、群組行為等）</li>
+                    </ul>
+                    <p style="margin-top:6px; font-size:12px; color:#856404;">修改 SOUL.md 等於改了龍蝦的「核心」，請想清楚再改。</p>
+                </div>
+
+                <div class="step-box">
+                    <strong>👤 USER.md — 使用者資訊（Tab：使用者）</strong><br>
+                    告訴龍蝦「你是誰」，讓它更了解你。<br>
+                    <ul style="margin:8px 0 0 20px; font-size:13px;">
+                        <li><strong>名字 / 稱呼</strong> — 龍蝦怎麼叫你（可以設定暱稱）</li>
+                        <li><strong>時區</strong> — 影響行事曆提醒、安靜時段等時間相關功能</li>
+                        <li><strong>主要語言</strong> — 龍蝦回覆你的語言偏好</li>
+                        <li><strong>個人背景</strong> — 你的職業、興趣、常用工具等，幫龍蝦更好地輔助你</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <strong>🤖 AGENTS.md — 代理人規範（Tab：代理人）</strong><br>
+                    龍蝦每次啟動時的行為準則和工作流程。<br>
+                    <ul style="margin:8px 0 0 20px; font-size:13px;">
+                        <li><strong>記憶系統</strong> — 每日記憶（memory/YYYY-MM-DD.md）和長期記憶（MEMORY.md）。建議全部開啟，龍蝦才能記住跟你的對話脈絡</li>
+                        <li><strong>安全原則</strong> — 防止龍蝦執行危險操作（刪除檔案、外洩隱私等）</li>
+                        <li><strong>群組聊天規則</strong> — 如果你在 Discord / LINE 群組使用龍蝦，這些規則決定它何時該發言、何時安靜</li>
+                        <li><strong>語音說故事</strong> — 需要安裝 ElevenLabs TTS（sag 技能），龍蝦會用語音朗讀故事和摘要</li>
+                        <li><strong>平台格式適配</strong> — 龍蝦會根據平台（Discord/WhatsApp/LINE）自動調整訊息格式</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <strong>🔧 TOOLS.md — 工具筆記（Tab：工具）</strong><br>
+                    龍蝦的「小抄」，記錄你的環境特有設定。<br>
+                    <ul style="margin:8px 0 0 20px; font-size:13px;">
+                        <li><strong>TTS 語音偏好</strong> — 龍蝦透過 LINE 發語音訊息時的聲音風格</li>
+                        <li><strong>自訂環境筆記</strong> — 你的 SSH 伺服器、常用 IDE、裝置名稱等。龍蝦會參考這些資訊來協助你</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <strong>💓 HEARTBEAT.md — 心跳排程（Tab：心跳）</strong><br>
+                    讓龍蝦「主動」定期檢查任務。<br>
+                    <ul style="margin:8px 0 0 20px; font-size:13px;">
+                        <li><strong>不啟用</strong> — 檔案留空/註解，不會產生 API 呼叫，省錢</li>
+                        <li><strong>輕量模式</strong> — 只檢查行事曆和天氣（每天 2~4 次）</li>
+                        <li><strong>完整模式</strong> — Email + 行事曆 + 天氣 + 社群 + 專案，全部檢查</li>
+                        <li><strong>自訂</strong> — 自己勾選要檢查的項目</li>
+                    </ul>
+                    <p style="margin-top:6px; font-size:12px; color:#856404;">每次心跳都會消耗 API 額度。如果是付費 API（如 OpenAI），不需要就選「不啟用」。</p>
+                </div>
+
+                <!-- ===== TTS 語音設定 ===== -->
+                <h3>TTS 語音功能設定</h3>
+                <p>龍蝦可以透過語音跟你互動（例如在 LINE 上發語音訊息）。有兩種 TTS 方案：</p>
+
+                <div class="step-box">
+                    <strong>方案 A：Sherpa-onnx TTS（本地離線，免費）</strong><br>
+                    <ul style="margin:8px 0 0 20px; font-size:13px;">
+                        <li>不需要雲端 API Key，在你的電腦上離線運行</li>
+                        <li>安裝方式：使用龍蝦自動安裝程式 → 全部安裝時會自動安裝</li>
+                        <li>模型路徑：<code>~/.openclaw/tools/sherpa-onnx-tts/models/</code></li>
+                        <li>環境變數（安裝程式會自動設定）：<br>
+                            <code style="display:block; margin:4px 0; font-size:12px;">SHERPA_ONNX_RUNTIME_DIR=~/.openclaw/tools/sherpa-onnx-tts/runtime</code>
+                            <code style="display:block; font-size:12px;">SHERPA_ONNX_MODEL_DIR=~/.openclaw/tools/sherpa-onnx-tts/models/vits-piper-en_US-lessac-high</code>
+                        </li>
+                        <li>適合：不想花錢、英語語音為主的使用者</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <strong>方案 B：ElevenLabs TTS（雲端，付費/有限免費）</strong><br>
+                    <ul style="margin:8px 0 0 20px; font-size:13px;">
+                        <li>高品質多語言語音，適合中文語音</li>
+                        <li>需要 ElevenLabs API Key：到 <a href="https://elevenlabs.io" target="_blank" style="color:#667eea;">elevenlabs.io</a> 註冊取得</li>
+                        <li>在 AGENTS.md 勾選「語音說故事模式」來啟用</li>
+                        <li>對應 OpenClaw 的 <code>sag</code> 技能</li>
+                        <li>適合：想要高品質中文語音的使用者</li>
+                    </ul>
+                </div>
+
+                <p style="font-size:13px; color:#666;">在此生成器的「工具」Tab 中選擇的 TTS 語音偏好，會寫入 TOOLS.md，龍蝦會以此作為預設語音風格。</p>
+
+                <!-- ===== Whisper 語音轉文字 ===== -->
+                <h3>Whisper 語音轉文字設定</h3>
+                <p>龍蝦可以聽懂你的語音訊息，將語音轉成文字再回覆。有兩種方案：</p>
+
+                <div class="step-box">
+                    <strong>方案 A：本地 Whisper（免費，需要較好的電腦）</strong><br>
+                    <ul style="margin:8px 0 0 20px; font-size:13px;">
+                        <li>不需要 API Key，在本機執行</li>
+                        <li>安裝：<code>pip install openai-whisper</code></li>
+                        <li>模型會自動下載到 <code>~/.cache/whisper</code></li>
+                        <li>首次使用建議用 <code>medium</code> 模型（中英文都不錯）</li>
+                        <li>需要較好的 GPU 或耐心等待（CPU 也可以，但較慢）</li>
+                    </ul>
+                </div>
+
+                <div class="step-box">
+                    <strong>方案 B：OpenAI Whisper API（付費，速度快）</strong><br>
+                    <ul style="margin:8px 0 0 20px; font-size:13px;">
+                        <li>需要 OpenAI API Key</li>
+                        <li>取得方式：到 <a href="https://platform.openai.com/api-keys" target="_blank" style="color:#667eea;">platform.openai.com/api-keys</a> 建立</li>
+                        <li>設定位置：<code>~/.openclaw/openclaw.json</code> 中的：<br>
+                            <code style="display:block; margin:4px 0; font-size:12px;">"skills" → "entries" → "openai-whisper-api" → "apiKey": "sk-proj-你的金鑰"</code>
+                        </li>
+                        <li>或使用龍蝦安裝程式選單 [K] API Key 管理 來設定</li>
+                        <li>費用：約 $0.006 / 分鐘（很便宜）</li>
+                    </ul>
+                </div>
+
+                <!-- ===== 需要的 API Key ===== -->
+                <h3>你可能需要的 API Key</h3>
+                <table class="file-table">
+                    <tr><th>項目</th><th>必要性</th><th>取得位置</th></tr>
+                    <tr><td><strong>LINE Channel Secret</strong></td><td>必要（如果用 LINE）</td><td><a href="https://developers.line.biz/console/" target="_blank" style="color:#667eea;">LINE Developers</a> → Basic settings</td></tr>
+                    <tr><td><strong>LINE Channel Access Token</strong></td><td>必要（如果用 LINE）</td><td>同上 → Messaging API → Issue</td></tr>
+                    <tr><td><strong>ngrok Authtoken</strong></td><td>必要（本地開發）</td><td><a href="https://dashboard.ngrok.com/signup" target="_blank" style="color:#667eea;">ngrok.com</a> → Your Authtoken</td></tr>
+                    <tr><td><strong>OpenAI API Key</strong></td><td>選用（AI 模型之一）</td><td><a href="https://platform.openai.com/api-keys" target="_blank" style="color:#667eea;">platform.openai.com</a></td></tr>
+                    <tr><td><strong>Google AI API Key</strong></td><td>選用（免費 Gemini）</td><td><a href="https://aistudio.google.com/apikey" target="_blank" style="color:#667eea;">aistudio.google.com</a></td></tr>
+                    <tr><td><strong>ElevenLabs API Key</strong></td><td>選用（高品質 TTS）</td><td><a href="https://elevenlabs.io" target="_blank" style="color:#667eea;">elevenlabs.io</a></td></tr>
+                </table>
+                <p style="margin-top:8px; font-size:13px;">AI 模型至少需要選一個（OpenAI 或 Google AI）。所有 API Key 都可以透過龍蝦安裝程式選單 <strong>[K] API Key 管理</strong> 來設定，或手動編輯 <code>~/.openclaw/openclaw.json</code>。</p>
+
+                <!-- ===== 常用指令 ===== -->
+                <h3>常用 OpenClaw 指令</h3>
+                <div class="step-box">
+                    <pre style="font-size:12px; line-height:1.8; color:#333; margin:0;"># 啟動/停止/重啟
+openclaw gateway start
+openclaw gateway stop
+openclaw gateway restart
+
+# 健康檢查
+openclaw doctor
+
+# LINE 配對
+openclaw pairing approve line &lt;配對碼&gt;
+
+# 安裝技能
+clawdhub search "關鍵字"
+clawdhub install 技能名稱
+
+# ngrok 通道（讓 LINE 找到你的電腦）
+ngrok http 18789</pre>
+                </div>
+
+                <!-- ===== 小提示 ===== -->
                 <h3>小提示</h3>
                 <ul>
-                    <li>龍蝦的人格會隨著使用逐漸演化，這些檔案只是「起點」</li>
-                    <li>你隨時可以手動編輯 .md 檔案來微調人格</li>
-                    <li>SOUL.md 是龍蝦的「靈魂」，修改前建議想清楚</li>
-                    <li>HEARTBEAT.md 留空 = 不啟用定期檢查，可省 API 額度</li>
+                    <li>這些設定檔只是「起點」，龍蝦的人格會隨著使用逐漸演化</li>
+                    <li>你隨時可以用文字編輯器（記事本、VS Code）手動修改 .md 檔</li>
+                    <li>SOUL.md 是龍蝦的「靈魂」，修改前建議先想清楚</li>
+                    <li>HEARTBEAT.md 留空 = 不啟用 = 不消耗 API 額度</li>
+                    <li>記憶系統的 <code>memory/</code> 資料夾會由龍蝦自動建立，不需要手動建立</li>
+                    <li>如果遇到問題，可以用 <code>openclaw doctor</code> 做健康檢查</li>
                 </ul>
 
                 <div style="text-align:center; margin-top:25px;">
