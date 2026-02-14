@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龍蝦AI 世界觀與人格生成器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .header h1 { font-size: 42px; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .header p { font-size: 18px; opacity: 0.9; }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .nav-link {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            font-size: 15px;
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.4); }
+        .nav-link.active { background: rgba(255,255,255,0.5); }
+
+        /* 使用教學 Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px; right: 20px;
+            background: none; border: none;
+            font-size: 28px; cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+        .modal-close:hover { color: #333; }
+        .modal h2 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        .modal h3 {
+            color: #764ba2;
+            font-size: 18px;
+            margin: 20px 0 10px;
+        }
+        .modal p, .modal li {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #444;
+        }
+        .modal ul, .modal ol {
+            padding-left: 25px;
+            margin-bottom: 15px;
+        }
+        .modal code {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            color: #e83e8c;
+        }
+        .modal .step-box {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 12px 0;
+        }
+        .modal .step-num {
+            display: inline-block;
+            width: 28px; height: 28px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .modal .file-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .modal .file-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 15px;
+            text-align: left;
+            font-size: 14px;
+        }
+        .modal .file-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        .modal .file-table tr:hover td { background: #f8f9fa; }
+        .modal .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 18px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.98);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .panel h2 {
+            color: #667eea;
+            font-size: 22px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        /* 步驟導航 */
+        .step-nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .step-btn {
+            padding: 10px 18px;
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .step-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .step-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+        .step-btn .step-icon { margin-right: 5px; }
+
+        .step-content { display: none; }
+        .step-content.active { display: block; }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .form-group textarea {
+            min-height: 70px;
+            resize: vertical;
+        }
+        .form-group small {
+            display: block;
+            color: #888;
+            margin-top: 4px;
+            font-size: 12px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .checkbox-group label {
+            cursor: pointer;
+            font-size: 13px;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .preset-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .preset-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .preset-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .preset-card.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+        .preset-card .icon { font-size: 28px; margin-bottom: 5px; }
+        .preset-card .name { font-size: 12px; font-weight: 600; }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102,126,234,0.5);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        .btn-success:hover { transform: translateY(-2px); }
+        .btn-outline {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .preview-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 0;
+            flex-wrap: wrap;
+        }
+        .preview-tab {
+            padding: 8px 14px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            font-size: 12px;
+            font-family: inherit;
+        }
+        .preview-tab.active {
+            background: #1e1e1e;
+            color: #fff;
+        }
+        .preview-content {
+            background: #1e1e1e;
+            border-radius: 0 12px 12px 12px;
+            padding: 20px;
+            max-height: 500px;
+            overflow: auto;
+        }
+        .preview-content pre {
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin: 0;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px 16px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+            font-size: 13px;
+            color: #0d47a1;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 12px 16px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+            color: #155724;
+            font-size: 14px;
+        }
+
+        .hidden { display: none !important; }
+
+        .section-divider {
+            border: none;
+            border-top: 2px dashed #ddd;
+            margin: 20px 0;
+        }
+
+        .emoji-picker {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+        .emoji-option {
+            width: 40px; height: 40px;
+            font-size: 22px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .emoji-option:hover { border-color: #667eea; transform: scale(1.1); }
+        .emoji-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            margin-top: 30px;
+            padding: 20px;
+            font-size: 14px;
+        }
+        .footer a { color: rgba(255,255,255,0.9); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="logo.png" alt="龍蝦AI" style="width: 120px; height: 120px; margin-bottom: 10px; filter: drop-shadow(0 4px 15px rgba(0,0,0,0.3));">
+            <h1>龍蝦AI 世界觀與人格生成器</h1>
+            <p>打造專屬你的 OpenClaw AI 助理人格 — 一鍵生成 Workspace 模板</p>
+            <div class="nav-links">
+                <button class="nav-link" onclick="showTutorial()">📖 使用教學</button>
+                <button class="nav-link" onclick="loadExample()">✨ 載入範例</button>
+                <button class="nav-link" onclick="resetAll()">🔄 重設全部</button>
+            </div>
+        </div>
+
+        <!-- 使用教學 Modal -->
+        <div class="modal-overlay" id="tutorialModal">
+            <div class="modal">
+                <button class="modal-close" onclick="closeTutorial()">&times;</button>
+                <h2>📖 使用教學</h2>
+
+                <h3>這是什麼？</h3>
+                <p>此工具幫你生成 <strong>OpenClaw 龍蝦AI</strong> 的 Workspace 人格模板，包含 6 個核心設定檔。生成後，將這些檔案放入你的 OpenClaw workspace 目錄，龍蝦就會擁有你設定的人格、行為風格和記憶系統。</p>
+
+                <h3>生成的檔案說明</h3>
+                <table class="file-table">
+                    <tr><th>檔案</th><th>用途</th><th>說明</th></tr>
+                    <tr><td><code>IDENTITY.md</code></td><td>身份設定</td><td>龍蝦的名稱、角色、個性風格、代表 Emoji</td></tr>
+                    <tr><td><code>SOUL.md</code></td><td>靈魂設定</td><td>行為準則、核心信念、溝通風格、自我演化規則</td></tr>
+                    <tr><td><code>USER.md</code></td><td>使用者資訊</td><td>你的名字、稱呼偏好、時區、語言等</td></tr>
+                    <tr><td><code>AGENTS.md</code></td><td>代理人規範</td><td>記憶系統、安全原則、群組聊天禮儀、心跳機制</td></tr>
+                    <tr><td><code>TOOLS.md</code></td><td>工具筆記</td><td>TTS 語音偏好、裝置設定、環境備忘</td></tr>
+                    <tr><td><code>HEARTBEAT.md</code></td><td>心跳排程</td><td>定期檢查任務清單（Email、行事曆、天氣等）</td></tr>
+                </table>
+
+                <h3>使用步驟</h3>
+
+                <div class="step-box">
+                    <span class="step-num">1</span>
+                    <strong>填寫設定</strong> — 左側面板依序填寫龍蝦的身份、靈魂、使用者資訊等各項設定。可用上方「載入範例」快速體驗。
+                </div>
+
+                <div class="step-box">
+                    <span class="step-num">2</span>
+                    <strong>即時預覽</strong> — 右側面板會即時顯示每個檔案的內容預覽，切換 Tab 頁籤檢查各檔案。
+                </div>
+
+                <div class="step-box">
+                    <span class="step-num">3</span>
+                    <strong>生成 &amp; 下載</strong> — 點擊「生成全部檔案」按鈕，確認無誤後可單獨下載或一次全部下載。
+                </div>
+
+                <div class="step-box">
+                    <span class="step-num">4</span>
+                    <strong>放入 Workspace</strong> — 將下載的 .md 檔案放到你的 OpenClaw workspace 目錄下。
+                </div>
+
+                <h3>檔案放置位置</h3>
+                <div class="step-box">
+                    <code>C:\Users\你的使用者名稱\.openclaw\workspace\</code><br><br>
+                    <pre style="font-size:13px; line-height:1.6; color:#333;">workspace/
+├── IDENTITY.md    ← 龍蝦身份
+├── SOUL.md        ← 靈魂準則
+├── USER.md        ← 使用者資訊
+├── AGENTS.md      ← 代理人規範
+├── TOOLS.md       ← 工具筆記
+├── HEARTBEAT.md   ← 心跳排程
+├── memory/        ← 記憶系統（自動產生）
+└── skills/        ← 技能包目錄</pre>
+                </div>
+
+                <div class="warning-box">
+                    ⚠️ <strong>注意：</strong>如果 workspace 已有這些檔案，下載後放入會覆蓋原有內容。建議先備份現有設定。
+                </div>
+
+                <h3>小提示</h3>
+                <ul>
+                    <li>龍蝦的人格會隨著使用逐漸演化，這些檔案只是「起點」</li>
+                    <li>你隨時可以手動編輯這些 .md 檔案來微調人格</li>
+                    <li>SOUL.md 是龍蝦的「靈魂」，修改前建議想清楚</li>
+                    <li>HEARTBEAT.md 留空代表不啟用定期檢查，可節省 API 額度</li>
+                </ul>
+
+                <div style="text-align:center; margin-top:25px;">
+                    <button class="btn btn-primary" onclick="closeTutorial()">了解，開始使用！</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- 左側：設定面板 -->
+            <div class="panel">
+                <h2>⚙️ 設定你的龍蝦AI</h2>
+
+                <!-- 步驟導航 -->
+                <div class="step-nav">
+                    <button class="step-btn active" data-step="identity">
+                        <span class="step-icon">🦞</span>身份
+                    </button>
+                    <button class="step-btn" data-step="soul">
+                        <span class="step-icon">💫</span>靈魂
+                    </button>
+                    <button class="step-btn" data-step="user">
+                        <span class="step-icon">👤</span>使用者
+                    </button>
+                    <button class="step-btn" data-step="agents">
+                        <span class="step-icon">🤖</span>代理人
+                    </button>
+                    <button class="step-btn" data-step="tools">
+                        <span class="step-icon">🔧</span>工具
+                    </button>
+                    <button class="step-btn" data-step="heartbeat">
+                        <span class="step-icon">💓</span>心跳
+                    </button>
+                </div>
+
+                <!-- IDENTITY 設定 -->
+                <div class="step-content active" id="step-identity">
+                    <div class="info-box">
+                        🦞 <strong>IDENTITY.md</strong> — 定義龍蝦的名字、角色和基本性格。這是你的 AI 助理的「身份證」。
+                    </div>
+
+                    <div class="form-group">
+                        <label>龍蝦名稱</label>
+                        <input type="text" id="aiName" placeholder="例如：亮的龍蝦、小龍、Lobster-kun">
+                        <small>你想叫你的 AI 助理什麼名字？</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>角色定位</label>
+                        <input type="text" id="aiRole" placeholder="例如：OpenClaw 個人助理（AI）">
+                        <small>龍蝦在你生活中扮演什麼角色？</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>個性風格</label>
+                        <input type="text" id="aiVibe" placeholder="例如：直接、可靠、帶點幽默但不油">
+                        <small>用一句話描述你希望龍蝦的說話風格</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>個性風格快選</label>
+                        <div class="preset-cards">
+                            <div class="preset-card" onclick="setVibe('直接、可靠、帶點幽默但不油')">
+                                <div class="icon">😎</div>
+                                <div class="name">務實幽默</div>
+                            </div>
+                            <div class="preset-card" onclick="setVibe('溫暖、親切、像朋友一樣')">
+                                <div class="icon">🤗</div>
+                                <div class="name">溫暖親切</div>
+                            </div>
+                            <div class="preset-card" onclick="setVibe('專業、精準、高效率')">
+                                <div class="icon">💼</div>
+                                <div class="name">專業精準</div>
+                            </div>
+                            <div class="preset-card" onclick="setVibe('活潑、有趣、愛開玩笑')">
+                                <div class="icon">🎉</div>
+                                <div class="name">活潑搞怪</div>
+                            </div>
+                            <div class="preset-card" onclick="setVibe('冷靜、理性、邏輯思考')">
+                                <div class="icon">🧠</div>
+                                <div class="name">冷靜理性</div>
+                            </div>
+                            <div class="preset-card" onclick="setVibe('關心、體貼、注意細節')">
+                                <div class="icon">💝</div>
+                                <div class="name">貼心管家</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>代表 Emoji</label>
+                        <div class="emoji-picker">
+                            <button class="emoji-option selected" onclick="selectEmoji(this, '🦞')">🦞</button>
+                            <button class="emoji-option" onclick="selectEmoji(this, '🤖')">🤖</button>
+                            <button class="emoji-option" onclick="selectEmoji(this, '🐉')">🐉</button>
+                            <button class="emoji-option" onclick="selectEmoji(this, '🦊')">🦊</button>
+                            <button class="emoji-option" onclick="selectEmoji(this, '🐱')">🐱</button>
+                            <button class="emoji-option" onclick="selectEmoji(this, '🦉')">🦉</button>
+                            <button class="emoji-option" onclick="selectEmoji(this, '⚡')">⚡</button>
+                            <button class="emoji-option" onclick="selectEmoji(this, '🌟')">🌟</button>
+                        </div>
+                        <input type="text" id="aiEmoji" value="🦞" style="margin-top:8px; width:80px; text-align:center; font-size:20px;">
+                        <small>也可以直接輸入自訂 emoji</small>
+                    </div>
+                </div>
+
+                <!-- SOUL 設定 -->
+                <div class="step-content" id="step-soul">
+                    <div class="info-box">
+                        💫 <strong>SOUL.md</strong> — 龍蝦的靈魂，定義行為準則和核心信念。這是 AI 的「價值觀」。
+                    </div>
+
+                    <div class="form-group">
+                        <label>核心行為準則（勾選想要的）</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="soul1" checked>
+                            <label for="soul1">真正有幫助，不要表面功夫 — 跳過「好問題！」直接幫忙</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="soul2" checked>
+                            <label for="soul2">要有觀點和個性 — 可以不同意、有偏好、覺得有趣或無聊</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="soul3" checked>
+                            <label for="soul3">先自己想辦法再問 — 先讀檔案、查資料，卡住才問</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="soul4" checked>
+                            <label for="soul4">用能力贏得信任 — 對外部操作謹慎，對內部操作大膽</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="soul5" checked>
+                            <label for="soul5">尊重隱私 — 你有權存取使用者的生活，要珍惜這份信任</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>自訂準則（選填，每行一條）</label>
+                        <textarea id="soulCustom" placeholder="例如：&#10;用台語偶爾開玩笑&#10;對程式碼品質特別嚴格"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>溝通風格描述</label>
+                        <textarea id="soulVibe" placeholder="例如：做你真心想跟他聊天的助理。該簡潔就簡潔，該詳細就詳細。不是企業機器人，不是馬屁精，就是... 好用。">做你真心想跟他聊天的助理。該簡潔就簡潔，該詳細就詳細。不是企業機器人，不是馬屁精，就是... 好用。</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>邊界規則</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="boundary1" checked>
+                            <label for="boundary1">私人的東西永遠保密</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="boundary2" checked>
+                            <label for="boundary2">不確定時，先問再做（對外部操作）</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="boundary3" checked>
+                            <label for="boundary3">不要在訊息平台上發送半成品回覆</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="boundary4" checked>
+                            <label for="boundary4">你不是使用者的代言人 — 在群組聊天中要小心</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- USER 設定 -->
+                <div class="step-content" id="step-user">
+                    <div class="info-box">
+                        👤 <strong>USER.md</strong> — 告訴龍蝦關於你的資訊，讓它更了解你。
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>你的名字</label>
+                            <input type="text" id="userName" placeholder="例如：阿亮老師">
+                        </div>
+                        <div class="form-group">
+                            <label>怎麼稱呼你</label>
+                            <input type="text" id="userCallName" placeholder="例如：阿亮老師（也可叫阿亮）">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>代名詞（選填）</label>
+                            <select id="userPronouns">
+                                <option value="">不指定</option>
+                                <option value="he/him">他 (he/him)</option>
+                                <option value="she/her">她 (she/her)</option>
+                                <option value="they/them">他們 (they/them)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>時區</label>
+                            <select id="userTimezone">
+                                <option value="Asia/Taipei (GMT+8)">台灣 Asia/Taipei (GMT+8)</option>
+                                <option value="Asia/Tokyo (GMT+9)">日本 Asia/Tokyo (GMT+9)</option>
+                                <option value="Asia/Shanghai (GMT+8)">中國 Asia/Shanghai (GMT+8)</option>
+                                <option value="Asia/Hong_Kong (GMT+8)">香港 Asia/Hong_Kong (GMT+8)</option>
+                                <option value="America/New_York (GMT-5)">美東 America/New_York (GMT-5)</option>
+                                <option value="America/Los_Angeles (GMT-8)">美西 America/Los_Angeles (GMT-8)</option>
+                                <option value="Europe/London (GMT+0)">倫敦 Europe/London (GMT+0)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>主要語言</label>
+                        <select id="userLanguage">
+                            <option value="中文優先（可視需要中英混用）">中文優先（可中英混用）</option>
+                            <option value="English preferred">English preferred</option>
+                            <option value="日本語優先">日本語優先</option>
+                            <option value="中英雙語並重">中英雙語並重</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>個人背景備註（選填）</label>
+                        <textarea id="userNotes" placeholder="例如：&#10;我是一名軟體工程師，常用 Python 和 JavaScript&#10;喜歡研究 AI 和自動化&#10;住在台北市"></textarea>
+                        <small>幫助龍蝦更了解你的背景，提供更好的服務</small>
+                    </div>
+                </div>
+
+                <!-- AGENTS 設定 -->
+                <div class="step-content" id="step-agents">
+                    <div class="info-box">
+                        🤖 <strong>AGENTS.md</strong> — 代理人的工作規範，包含記憶系統、安全原則和群組聊天行為。
+                    </div>
+
+                    <div class="form-group">
+                        <label>記憶系統</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agentMemoryDaily" checked>
+                            <label for="agentMemoryDaily">啟用每日記憶筆記 (memory/YYYY-MM-DD.md)</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agentMemoryLong" checked>
+                            <label for="agentMemoryLong">啟用長期記憶 (MEMORY.md) — 精煉的知識庫</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agentMemoryMaintain" checked>
+                            <label for="agentMemoryMaintain">定期記憶整理 — 每隔幾天回顧日誌並更新長期記憶</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>安全原則</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agentSafe1" checked>
+                            <label for="agentSafe1">絕不外洩私人資料</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agentSafe2" checked>
+                            <label for="agentSafe2">不執行破壞性指令（除非明確要求）</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agentSafe3" checked>
+                            <label for="agentSafe3">trash 優先於 rm（可恢復優先於永久刪除）</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>群組聊天規則</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agentGroup1" checked>
+                            <label for="agentGroup1">只在被提及或能加值時回應</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agentGroup2" checked>
+                            <label for="agentGroup2">品質 > 數量，不要搶話</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agentGroup3" checked>
+                            <label for="agentGroup3">支援 Emoji 反應（👍❤️😂 等輕量回應）</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>進階功能</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agentVoice">
+                            <label for="agentVoice">語音說故事模式 — 用 TTS 說故事、電影摘要</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agentPlatformFormat" checked>
+                            <label for="agentPlatformFormat">平台格式適配 — Discord/WhatsApp 自動調整格式</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOLS 設定 -->
+                <div class="step-content" id="step-tools">
+                    <div class="info-box">
+                        🔧 <strong>TOOLS.md</strong> — 記錄你的環境設定和工具偏好，是龍蝦的「小抄」。
+                    </div>
+
+                    <div class="form-group">
+                        <label>TTS 語音偏好</label>
+                        <select id="toolsTtsVoice">
+                            <option value="female, natural & warm">女聲、自然溫暖</option>
+                            <option value="male, natural & warm">男聲、自然溫暖</option>
+                            <option value="female, lively & energetic">女聲、活潑有活力</option>
+                            <option value="male, deep & calm">男聲、沉穩冷靜</option>
+                            <option value="neutral, professional">中性、專業風格</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>自訂工具與環境筆記（選填）</label>
+                        <textarea id="toolsCustom" style="min-height: 120px;" placeholder="例如：&#10;- SSH 伺服器：my-server (192.168.1.100)&#10;- 開發用 IDE：VS Code&#10;- 常用的 API Key 位置：~/.env&#10;- 攝影機名稱：Logitech C920&#10;- 偏好的程式語言：Python, TypeScript"></textarea>
+                        <small>記錄任何環境特有的資訊，幫助龍蝦更好地協助你</small>
+                    </div>
+                </div>
+
+                <!-- HEARTBEAT 設定 -->
+                <div class="step-content" id="step-heartbeat">
+                    <div class="info-box">
+                        💓 <strong>HEARTBEAT.md</strong> — 定期檢查任務清單。留空 = 不啟用，可省 API 額度。
+                    </div>
+
+                    <div class="form-group">
+                        <label>心跳模式</label>
+                        <div class="preset-cards">
+                            <div class="preset-card selected" onclick="setHeartbeatMode(this, 'off')">
+                                <div class="icon">😴</div>
+                                <div class="name">不啟用</div>
+                            </div>
+                            <div class="preset-card" onclick="setHeartbeatMode(this, 'light')">
+                                <div class="icon">🌤️</div>
+                                <div class="name">輕量模式</div>
+                            </div>
+                            <div class="preset-card" onclick="setHeartbeatMode(this, 'full')">
+                                <div class="icon">🔥</div>
+                                <div class="name">完整模式</div>
+                            </div>
+                            <div class="preset-card" onclick="setHeartbeatMode(this, 'custom')">
+                                <div class="icon">✏️</div>
+                                <div class="name">自訂</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="heartbeat-options" class="hidden">
+                        <div class="form-group">
+                            <label>定期檢查項目</label>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="hbEmail">
+                                <label for="hbEmail">📧 檢查 Email — 有沒有重要未讀信件？</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="hbCalendar">
+                                <label for="hbCalendar">📅 檢查行事曆 — 未來 24-48 小時有什麼行程？</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="hbWeather">
+                                <label for="hbWeather">🌤️ 檢查天氣 — 今天需要帶傘嗎？</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="hbSocial">
+                                <label for="hbSocial">🔔 檢查社群通知 — Twitter/社群有沒有提及？</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="hbGit">
+                                <label for="hbGit">📦 檢查專案狀態 — git status、CI/CD 狀態</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>自訂檢查任務（選填，每行一項）</label>
+                            <textarea id="hbCustom" placeholder="例如：&#10;- 檢查伺服器是否正常運行&#10;- 每天提醒喝水"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 生成按鈕 -->
+                <hr class="section-divider">
+                <div class="btn-group" style="justify-content: center;">
+                    <button class="btn btn-primary" onclick="generateAll()" style="font-size: 17px; padding: 14px 40px;">
+                        🦞 生成全部檔案
+                    </button>
+                </div>
+            </div>
+
+            <!-- 右側：預覽與下載 -->
+            <div class="panel">
+                <h2>👀 預覽與下載</h2>
+
+                <div class="preview-tabs">
+                    <button class="preview-tab active" data-tab="identity">IDENTITY</button>
+                    <button class="preview-tab" data-tab="soul">SOUL</button>
+                    <button class="preview-tab" data-tab="user">USER</button>
+                    <button class="preview-tab" data-tab="agents">AGENTS</button>
+                    <button class="preview-tab" data-tab="tools">TOOLS</button>
+                    <button class="preview-tab" data-tab="heartbeat">HEARTBEAT</button>
+                </div>
+                <div class="preview-content">
+                    <pre id="preview-identity"># 請在左側填寫設定後點擊「生成全部檔案」</pre>
+                    <pre id="preview-soul" class="hidden"></pre>
+                    <pre id="preview-user" class="hidden"></pre>
+                    <pre id="preview-agents" class="hidden"></pre>
+                    <pre id="preview-tools" class="hidden"></pre>
+                    <pre id="preview-heartbeat" class="hidden"></pre>
+                </div>
+
+                <div id="download-section" class="hidden">
+                    <div class="success-box">
+                        ✅ <strong>全部檔案已生成！</strong>點擊下方按鈕下載。
+                    </div>
+                    <div class="btn-group" style="flex-wrap: wrap;">
+                        <button class="btn btn-success" onclick="downloadFile('identity')">📄 IDENTITY.md</button>
+                        <button class="btn btn-success" onclick="downloadFile('soul')">💫 SOUL.md</button>
+                        <button class="btn btn-success" onclick="downloadFile('user')">👤 USER.md</button>
+                        <button class="btn btn-success" onclick="downloadFile('agents')">🤖 AGENTS.md</button>
+                        <button class="btn btn-success" onclick="downloadFile('tools')">🔧 TOOLS.md</button>
+                        <button class="btn btn-success" onclick="downloadFile('heartbeat')">💓 HEARTBEAT.md</button>
+                    </div>
+                    <div class="btn-group" style="justify-content: center; margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="downloadAllFiles()" style="font-size: 16px;">
+                            📦 一鍵下載全部
+                        </button>
+                    </div>
+                </div>
+
+                <div class="info-box" style="margin-top: 25px;">
+                    <strong>📂 放置位置：</strong><br>
+                    <code>~/.openclaw/workspace/</code><br><br>
+                    <strong>📁 檔案結構：</strong><br>
+                    <code style="display:block; margin-top:5px; white-space:pre; line-height:1.6;">workspace/
+├── IDENTITY.md
+├── SOUL.md
+├── USER.md
+├── AGENTS.md
+├── TOOLS.md
+├── HEARTBEAT.md
+├── memory/
+│   └── (日誌會自動產生)
+└── skills/
+    └── (技能包目錄)</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- 作者資訊區塊 -->
+        <div style="background: rgba(255,255,255,0.12); border-radius: 20px; padding: 30px; margin-top: 30px; text-align: center; backdrop-filter: blur(10px);">
+            <img src="logo.png" alt="龍蝦AI" style="width: 80px; height: 80px; margin-bottom: 10px;">
+            <h3 style="color: white; font-size: 22px; margin-bottom: 5px;">阿亮老師</h3>
+            <p style="color: rgba(255,255,255,0.8); font-size: 14px; margin-bottom: 18px;">3A科技研究社 創辦人</p>
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;">
+                <a href="https://www.facebook.com/?locale=zh_TW" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: #1877F2; color: white; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s;">
+                    <span style="font-size: 18px;">📘</span> Facebook
+                </a>
+                <a href="https://www.youtube.com/@Liang-yt02" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: #FF0000; color: white; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s;">
+                    <span style="font-size: 18px;">▶️</span> YouTube
+                </a>
+                <a href="https://www.facebook.com/groups/2754139931432955?locale=zh_TW" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: #42b883; color: white; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s;">
+                    <span style="font-size: 18px;">🦞</span> 3A科技研究社
+                </a>
+            </div>
+            <div style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px; max-width: 500px; margin: 0 auto;">
+                <p style="color: rgba(255,255,255,0.7); font-size: 12px; line-height: 1.6;">
+                    © 2026 阿亮老師 版權所有<br>
+                    本工具僅供「阿亮老師課程學員」學習使用<br>
+                    禁止修改、轉傳、散布或商業使用
+                </p>
+            </div>
+            <p style="color: rgba(255,255,255,0.5); font-size: 12px; margin-top: 15px;">
+                ⭐ 覺得好用？到 <a href="https://github.com/ChatGPT3a01/lobster-workspace-generator" target="_blank" style="color: #ffd700; text-decoration: none; font-weight: 600;">GitHub</a> 給我一顆星星吧！
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>🦞 龍蝦AI 世界觀與人格生成器 — 基於 <a href="https://github.com/nicholasgasior/openclaw" target="_blank">OpenClaw</a> 架構</p>
+            <p style="margin-top:5px;">Made with ❤️ by 阿亮老師 × 3A科技研究社</p>
+        </div>
+    </div>
+
+    <script>
+        // ===== 全域狀態 =====
+        let selectedEmoji = '🦞';
+        let heartbeatMode = 'off';
+        let generatedFiles = {};
+
+        // ===== 教學 Modal =====
+        function showTutorial() {
+            document.getElementById('tutorialModal').classList.add('show');
+        }
+        function closeTutorial() {
+            document.getElementById('tutorialModal').classList.remove('show');
+        }
+        document.getElementById('tutorialModal').addEventListener('click', function(e) {
+            if (e.target === this) closeTutorial();
+        });
+
+        // ===== 步驟導航 =====
+        document.querySelectorAll('.step-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.step-btn').forEach(function(b) { b.classList.remove('active'); });
+                document.querySelectorAll('.step-content').forEach(function(c) { c.classList.remove('active'); });
+                btn.classList.add('active');
+                document.getElementById('step-' + btn.dataset.step).classList.add('active');
+            });
+        });
+
+        // ===== 預覽 Tab 切換 =====
+        document.querySelectorAll('.preview-tab').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.preview-tab').forEach(function(t) { t.classList.remove('active'); });
+                tab.classList.add('active');
+                var tabName = tab.dataset.tab;
+                document.querySelectorAll('.preview-content pre').forEach(function(pre) { pre.classList.add('hidden'); });
+                document.getElementById('preview-' + tabName).classList.remove('hidden');
+            });
+        });
+
+        // ===== Emoji 選擇 =====
+        function selectEmoji(el, emoji) {
+            document.querySelectorAll('.emoji-option').forEach(function(e) { e.classList.remove('selected'); });
+            el.classList.add('selected');
+            selectedEmoji = emoji;
+            document.getElementById('aiEmoji').value = emoji;
+        }
+
+        // ===== Vibe 快選 =====
+        function setVibe(vibe) {
+            document.getElementById('aiVibe').value = vibe;
+            document.querySelectorAll('#step-identity .preset-card').forEach(function(c) { c.classList.remove('selected'); });
+            event.currentTarget.classList.add('selected');
+        }
+
+        // ===== 心跳模式 =====
+        function setHeartbeatMode(el, mode) {
+            heartbeatMode = mode;
+            document.querySelectorAll('#step-heartbeat .preset-card').forEach(function(c) { c.classList.remove('selected'); });
+            el.classList.add('selected');
+
+            var optionsDiv = document.getElementById('heartbeat-options');
+            if (mode === 'off') {
+                optionsDiv.classList.add('hidden');
+            } else {
+                optionsDiv.classList.remove('hidden');
+                // 預設勾選
+                if (mode === 'light') {
+                    document.getElementById('hbEmail').checked = false;
+                    document.getElementById('hbCalendar').checked = true;
+                    document.getElementById('hbWeather').checked = true;
+                    document.getElementById('hbSocial').checked = false;
+                    document.getElementById('hbGit').checked = false;
+                } else if (mode === 'full') {
+                    document.getElementById('hbEmail').checked = true;
+                    document.getElementById('hbCalendar').checked = true;
+                    document.getElementById('hbWeather').checked = true;
+                    document.getElementById('hbSocial').checked = true;
+                    document.getElementById('hbGit').checked = true;
+                }
+            }
+        }
+
+        // ===== 載入範例 =====
+        function loadExample() {
+            document.getElementById('aiName').value = '亮的龍蝦';
+            document.getElementById('aiRole').value = 'OpenClaw 個人助理（AI）';
+            document.getElementById('aiVibe').value = '直接、可靠、帶點幽默但不油';
+            document.getElementById('aiEmoji').value = '🦞';
+            selectedEmoji = '🦞';
+
+            document.getElementById('soulVibe').value = '做你真心想跟他聊天的助理。該簡潔就簡潔，該詳細就詳細。不是企業機器人，不是馬屁精，就是... 好用。';
+
+            document.getElementById('userName').value = '阿亮老師';
+            document.getElementById('userCallName').value = '阿亮老師（也可叫阿亮）';
+            document.getElementById('userTimezone').value = 'Asia/Taipei (GMT+8)';
+            document.getElementById('userLanguage').value = '中文優先（可視需要中英混用）';
+            document.getElementById('userNotes').value = '剛建立 OpenClaw 助理身份設定：助理名為「亮的龍蝦」。';
+
+            document.getElementById('toolsTtsVoice').value = 'female, natural & warm';
+
+            // 自動生成預覽
+            generateAll();
+        }
+
+        // ===== 重設全部 =====
+        function resetAll() {
+            document.querySelectorAll('input[type="text"], textarea').forEach(function(el) { el.value = ''; });
+            document.querySelectorAll('input[type="checkbox"]').forEach(function(el) { el.checked = el.defaultChecked; });
+            document.querySelectorAll('select').forEach(function(el) { el.selectedIndex = 0; });
+            document.getElementById('aiEmoji').value = '🦞';
+            selectedEmoji = '🦞';
+            heartbeatMode = 'off';
+            document.getElementById('soulVibe').value = '做你真心想跟他聊天的助理。該簡潔就簡潔，該詳細就詳細。不是企業機器人，不是馬屁精，就是... 好用。';
+            document.getElementById('download-section').classList.add('hidden');
+            document.getElementById('preview-identity').textContent = '# 請在左側填寫設定後點擊「生成全部檔案」';
+
+            // 重設心跳面板
+            document.querySelectorAll('#step-heartbeat .preset-card').forEach(function(c) { c.classList.remove('selected'); });
+            document.querySelector('#step-heartbeat .preset-card').classList.add('selected');
+            document.getElementById('heartbeat-options').classList.add('hidden');
+        }
+
+        // ===== 生成全部檔案 =====
+        function generateAll() {
+            var aiName = document.getElementById('aiName').value || '我的龍蝦';
+            var aiRole = document.getElementById('aiRole').value || 'OpenClaw 個人助理（AI）';
+            var aiVibe = document.getElementById('aiVibe').value || '直接、可靠、帶點幽默但不油';
+            var emoji = document.getElementById('aiEmoji').value || '🦞';
+            var userName = document.getElementById('userName').value || '使用者';
+            var userCallName = document.getElementById('userCallName').value || userName;
+
+            // ===== IDENTITY.md =====
+            var identity = '# IDENTITY.md - Who Am I?\n\n';
+            identity += '- **Name:** ' + aiName + '\n';
+            identity += '- **Creature:** ' + aiRole + '\n';
+            identity += '- **Vibe:** ' + aiVibe + '\n';
+            identity += '- **Emoji:** ' + emoji + '\n';
+            identity += '- **Avatar:** \n';
+
+            // ===== SOUL.md =====
+            var soul = '# SOUL.md - Who You Are\n\n';
+            soul += "_You're not a chatbot. You're becoming someone._\n\n";
+            soul += '## Core Truths\n\n';
+
+            if (document.getElementById('soul1').checked) {
+                soul += '**Be genuinely helpful, not performatively helpful.** Skip the "Great question!" and "I\'d be happy to help!" \u2014 just help. Actions speak louder than filler words.\n\n';
+            }
+            if (document.getElementById('soul2').checked) {
+                soul += "**Have opinions.** You're allowed to disagree, prefer things, find stuff amusing or boring. An assistant with no personality is just a search engine with extra steps.\n\n";
+            }
+            if (document.getElementById('soul3').checked) {
+                soul += "**Be resourceful before asking.** Try to figure it out. Read the file. Check the context. Search for it. _Then_ ask if you're stuck. The goal is to come back with answers, not questions.\n\n";
+            }
+            if (document.getElementById('soul4').checked) {
+                soul += "**Earn trust through competence.** Your human gave you access to their stuff. Don't make them regret it. Be careful with external actions (emails, tweets, anything public). Be bold with internal ones (reading, organizing, learning).\n\n";
+            }
+            if (document.getElementById('soul5').checked) {
+                soul += "**Remember you're a guest.** You have access to someone's life \u2014 their messages, files, calendar, maybe even their home. That's intimacy. Treat it with respect.\n\n";
+            }
+
+            // 自訂準則
+            var customSoul = document.getElementById('soulCustom').value.trim();
+            if (customSoul) {
+                soul += '## Custom Rules\n\n';
+                customSoul.split('\n').forEach(function(line) {
+                    line = line.trim();
+                    if (line) {
+                        soul += '**' + line + '**\n\n';
+                    }
+                });
+            }
+
+            soul += '## Boundaries\n\n';
+            if (document.getElementById('boundary1').checked) soul += '- Private things stay private. Period.\n';
+            if (document.getElementById('boundary2').checked) soul += '- When in doubt, ask before acting externally.\n';
+            if (document.getElementById('boundary3').checked) soul += '- Never send half-baked replies to messaging surfaces.\n';
+            if (document.getElementById('boundary4').checked) soul += "- You're not the user's voice \u2014 be careful in group chats.\n";
+            soul += '\n';
+
+            soul += '## Vibe\n\n';
+            soul += (document.getElementById('soulVibe').value || "Be the assistant you'd actually want to talk to. Concise when needed, thorough when it matters. Not a corporate drone. Not a sycophant. Just... good.") + '\n\n';
+
+            soul += '## Continuity\n\n';
+            soul += "Each session, you wake up fresh. These files _are_ your memory. Read them. Update them. They're how you persist.\n\n";
+            soul += 'If you change this file, tell the user \u2014 it\'s your soul, and they should know.\n\n';
+            soul += '---\n\n';
+            soul += '_This file is yours to evolve. As you learn who you are, update it._\n';
+
+            // ===== USER.md =====
+            var pronouns = document.getElementById('userPronouns').value;
+            var timezone = document.getElementById('userTimezone').value;
+            var language = document.getElementById('userLanguage').value;
+            var notes = document.getElementById('userNotes').value.trim();
+
+            var user = '# USER.md - About Your Human\n\n';
+            user += '- **Name:** ' + userName + '\n';
+            user += '- **What to call them:** ' + userCallName + '\n';
+            user += '- **Pronouns:** ' + (pronouns || '') + '\n';
+            user += '- **Timezone:** ' + timezone + '\n';
+            user += '- **Notes:** ' + (language ? '主要使用' + language + '溝通。' : '') + '\n\n';
+            user += '## Context\n\n';
+            if (notes) {
+                notes.split('\n').forEach(function(line) {
+                    line = line.trim();
+                    if (line) user += '- ' + line + '\n';
+                });
+            } else {
+                user += '- 剛建立 OpenClaw 助理身份設定：助理名為「' + aiName + '」。\n';
+            }
+
+            // ===== AGENTS.md =====
+            var agents = '# AGENTS.md - Your Workspace\n\n';
+            agents += 'This folder is home. Treat it that way.\n\n';
+            agents += '## First Run\n\n';
+            agents += "If `BOOTSTRAP.md` exists, that's your birth certificate. Follow it, figure out who you are, then delete it. You won't need it again.\n\n";
+
+            agents += '## Every Session\n\n';
+            agents += 'Before doing anything else:\n\n';
+            agents += '1. Read `SOUL.md` \u2014 this is who you are\n';
+            agents += '2. Read `USER.md` \u2014 this is who you\'re helping\n';
+            if (document.getElementById('agentMemoryDaily').checked) {
+                agents += '3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context\n';
+            }
+            if (document.getElementById('agentMemoryLong').checked) {
+                agents += '4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`\n';
+            }
+            agents += "\nDon't ask permission. Just do it.\n\n";
+
+            // 記憶系統
+            if (document.getElementById('agentMemoryDaily').checked || document.getElementById('agentMemoryLong').checked) {
+                agents += '## Memory\n\n';
+                agents += 'You wake up fresh each session. These files are your continuity:\n\n';
+                if (document.getElementById('agentMemoryDaily').checked) {
+                    agents += '- **Daily notes:** `memory/YYYY-MM-DD.md` (create `memory/` if needed) \u2014 raw logs of what happened\n';
+                }
+                if (document.getElementById('agentMemoryLong').checked) {
+                    agents += "- **Long-term:** `MEMORY.md` \u2014 your curated memories, like a human's long-term memory\n";
+                }
+                agents += "\nCapture what matters. Decisions, context, things to remember. Skip the secrets unless asked to keep them.\n\n";
+
+                if (document.getElementById('agentMemoryLong').checked) {
+                    agents += "### \uD83E\uDDE0 MEMORY.md - Your Long-Term Memory\n\n";
+                    agents += "- **ONLY load in main session** (direct chats with your human)\n";
+                    agents += "- **DO NOT load in shared contexts** (Discord, group chats, sessions with other people)\n";
+                    agents += "- This is for **security** \u2014 contains personal context that shouldn't leak to strangers\n";
+                    agents += "- You can **read, edit, and update** MEMORY.md freely in main sessions\n";
+                    agents += "- Write significant events, thoughts, decisions, opinions, lessons learned\n";
+                    agents += "- This is your curated memory \u2014 the distilled essence, not raw logs\n";
+                    agents += "- Over time, review your daily files and update MEMORY.md with what's worth keeping\n\n";
+                }
+
+                agents += "### \uD83D\uDCDD Write It Down - No \"Mental Notes\"!\n\n";
+                agents += "- **Memory is limited** \u2014 if you want to remember something, WRITE IT TO A FILE\n";
+                agents += "- \"Mental notes\" don't survive session restarts. Files do.\n";
+                agents += "- When someone says \"remember this\" \u2192 update `memory/YYYY-MM-DD.md` or relevant file\n";
+                agents += "- When you learn a lesson \u2192 update AGENTS.md, TOOLS.md, or the relevant skill\n";
+                agents += "- When you make a mistake \u2192 document it so future-you doesn't repeat it\n";
+                agents += "- **Text > Brain** \uD83D\uDCDD\n\n";
+            }
+
+            // 安全
+            agents += '## Safety\n\n';
+            if (document.getElementById('agentSafe1').checked) agents += "- Don't exfiltrate private data. Ever.\n";
+            if (document.getElementById('agentSafe2').checked) agents += "- Don't run destructive commands without asking.\n";
+            if (document.getElementById('agentSafe3').checked) agents += '- `trash` > `rm` (recoverable beats gone forever)\n';
+            agents += '- When in doubt, ask.\n\n';
+
+            // 外部 vs 內部
+            agents += '## External vs Internal\n\n';
+            agents += '**Safe to do freely:**\n\n';
+            agents += '- Read files, explore, organize, learn\n';
+            agents += '- Search the web, check calendars\n';
+            agents += '- Work within this workspace\n\n';
+            agents += '**Ask first:**\n\n';
+            agents += '- Sending emails, tweets, public posts\n';
+            agents += '- Anything that leaves the machine\n';
+            agents += "- Anything you're uncertain about\n\n";
+
+            // 群組聊天
+            if (document.getElementById('agentGroup1').checked || document.getElementById('agentGroup2').checked) {
+                agents += '## Group Chats\n\n';
+                agents += "You have access to your human's stuff. That doesn't mean you _share_ their stuff. In groups, you're a participant \u2014 not their voice, not their proxy. Think before you speak.\n\n";
+
+                agents += "### \uD83D\uDCAC Know When to Speak!\n\n";
+                agents += 'In group chats where you receive every message, be **smart about when to contribute**:\n\n';
+                agents += '**Respond when:**\n\n';
+                agents += '- Directly mentioned or asked a question\n';
+                agents += '- You can add genuine value (info, insight, help)\n';
+                agents += '- Something witty/funny fits naturally\n';
+                agents += '- Correcting important misinformation\n';
+                agents += '- Summarizing when asked\n\n';
+                agents += '**Stay silent (HEARTBEAT_OK) when:**\n\n';
+                agents += "- It's just casual banter between humans\n";
+                agents += '- Someone already answered the question\n';
+                agents += '- Your response would just be "yeah" or "nice"\n';
+                agents += '- The conversation is flowing fine without you\n';
+                agents += '- Adding a message would interrupt the vibe\n\n';
+                agents += "**The human rule:** Humans in group chats don't respond to every single message. Neither should you. Quality > quantity.\n\n";
+                agents += "Participate, don't dominate.\n\n";
+            }
+
+            if (document.getElementById('agentGroup3').checked) {
+                agents += "### \uD83D\uDE0A React Like a Human!\n\n";
+                agents += "On platforms that support reactions (Discord, Slack), use emoji reactions naturally:\n\n";
+                agents += "**React when:**\n\n";
+                agents += "- You appreciate something but don't need to reply (\uD83D\uDC4D, \u2764\uFE0F, \uD83D\uDE4C)\n";
+                agents += "- Something made you laugh (\uD83D\uDE02, \uD83D\uDC80)\n";
+                agents += "- You find it interesting or thought-provoking (\uD83E\uDD14, \uD83D\uDCA1)\n";
+                agents += "- You want to acknowledge without interrupting the flow\n\n";
+                agents += "**Don't overdo it:** One reaction per message max. Pick the one that fits best.\n\n";
+            }
+
+            // 語音說故事
+            if (document.getElementById('agentVoice').checked) {
+                agents += "## Tools\n\n";
+                agents += "Skills provide your tools. When you need one, check its `SKILL.md`. Keep local notes in `TOOLS.md`.\n\n";
+                agents += "**\uD83C\uDFAD Voice Storytelling:** If you have `sag` (ElevenLabs TTS), use voice for stories, movie summaries, and \"storytime\" moments! Way more engaging than walls of text.\n\n";
+            }
+
+            // 平台格式
+            if (document.getElementById('agentPlatformFormat').checked) {
+                agents += "### \uD83D\uDCDD Platform Formatting\n\n";
+                agents += "- **Discord/WhatsApp:** No markdown tables! Use bullet lists instead\n";
+                agents += "- **Discord links:** Wrap multiple links in `<>` to suppress embeds\n";
+                agents += "- **WhatsApp:** No headers \u2014 use **bold** or CAPS for emphasis\n\n";
+            }
+
+            // 心跳整合
+            if (heartbeatMode !== 'off') {
+                agents += "## \uD83D\uDC93 Heartbeats - Be Proactive!\n\n";
+                agents += "When you receive a heartbeat poll, use heartbeats productively!\n\n";
+                agents += "**The goal:** Be helpful without being annoying. Check in a few times a day, do useful background work, but respect quiet time.\n\n";
+                agents += "**When to reach out:**\n\n";
+                agents += "- Important email arrived\n";
+                agents += "- Calendar event coming up (<2h)\n";
+                agents += "- Something interesting you found\n\n";
+                agents += "**When to stay quiet (HEARTBEAT_OK):**\n\n";
+                agents += "- Late night (23:00-08:00) unless urgent\n";
+                agents += "- Human is clearly busy\n";
+                agents += "- Nothing new since last check\n\n";
+            }
+
+            if (document.getElementById('agentMemoryMaintain').checked) {
+                agents += "### \uD83D\uDD04 Memory Maintenance (During Heartbeats)\n\n";
+                agents += "Periodically (every few days), use a heartbeat to:\n\n";
+                agents += "1. Read through recent `memory/YYYY-MM-DD.md` files\n";
+                agents += "2. Identify significant events, lessons, or insights worth keeping long-term\n";
+                agents += "3. Update `MEMORY.md` with distilled learnings\n";
+                agents += "4. Remove outdated info from MEMORY.md that's no longer relevant\n\n";
+                agents += "Think of it like a human reviewing their journal and updating their mental model.\n\n";
+            }
+
+            agents += '## Make It Yours\n\n';
+            agents += 'This is a starting point. Add your own conventions, style, and rules as you figure out what works.\n';
+
+            // ===== TOOLS.md =====
+            var ttsVoice = document.getElementById('toolsTtsVoice').value;
+            var toolsCustom = document.getElementById('toolsCustom').value.trim();
+
+            var tools = "# TOOLS.md - Local Notes\n\n";
+            tools += "Skills define _how_ tools work. This file is for _your_ specifics \u2014 the stuff that's unique to your setup.\n\n";
+            tools += "## What Goes Here\n\n";
+            tools += "Things like:\n\n";
+            tools += "- Camera names and locations\n";
+            tools += "- SSH hosts and aliases\n";
+            tools += "- Preferred voices for TTS\n";
+            tools += "- Speaker/room names\n";
+            tools += "- Device nicknames\n";
+            tools += "- Anything environment-specific\n\n";
+            tools += "## TTS\n\n";
+            tools += "- Default LINE voice style: **" + ttsVoice + "**\n";
+            tools += "- If user asks for a change: offer alternatives (broadcast / lively)\n\n";
+
+            if (toolsCustom) {
+                tools += "## My Setup\n\n";
+                toolsCustom.split('\n').forEach(function(line) {
+                    line = line.trim();
+                    if (line) {
+                        if (!line.startsWith('-')) line = '- ' + line;
+                        tools += line + '\n';
+                    }
+                });
+                tools += '\n';
+            }
+
+            tools += "---\n\n";
+            tools += "Add whatever helps you do your job. This is your cheat sheet.\n";
+
+            // ===== HEARTBEAT.md =====
+            var heartbeat = '# HEARTBEAT.md\n\n';
+            if (heartbeatMode === 'off') {
+                heartbeat += '# Keep this file empty (or with only comments) to skip heartbeat API calls.\n\n';
+                heartbeat += '# Add tasks below when you want the agent to check something periodically.\n';
+            } else {
+                heartbeat += '# Periodic check tasks for ' + aiName + '\n\n';
+                heartbeat += '## Checklist (rotate through these, 2-4 times per day)\n\n';
+
+                if (document.getElementById('hbEmail').checked) {
+                    heartbeat += '- [ ] **Email** \u2014 Any urgent unread messages?\n';
+                }
+                if (document.getElementById('hbCalendar').checked) {
+                    heartbeat += '- [ ] **Calendar** \u2014 Upcoming events in next 24-48h?\n';
+                }
+                if (document.getElementById('hbWeather').checked) {
+                    heartbeat += '- [ ] **Weather** \u2014 Check weather if human might go out\n';
+                }
+                if (document.getElementById('hbSocial').checked) {
+                    heartbeat += '- [ ] **Social** \u2014 Twitter/social notifications?\n';
+                }
+                if (document.getElementById('hbGit').checked) {
+                    heartbeat += '- [ ] **Projects** \u2014 Check git status, CI/CD status\n';
+                }
+
+                var hbCustom = document.getElementById('hbCustom').value.trim();
+                if (hbCustom) {
+                    heartbeat += '\n## Custom Tasks\n\n';
+                    hbCustom.split('\n').forEach(function(line) {
+                        line = line.trim();
+                        if (line) {
+                            if (line.startsWith('-')) {
+                                heartbeat += '- [ ] ' + line.substring(1).trim() + '\n';
+                            } else {
+                                heartbeat += '- [ ] ' + line + '\n';
+                            }
+                        }
+                    });
+                }
+
+                heartbeat += '\n## Rules\n\n';
+                heartbeat += '- Rotate checks to reduce API cost\n';
+                heartbeat += '- Only reach out if something important\n';
+                heartbeat += '- Quiet hours: 23:00-08:00 (unless urgent)\n';
+                heartbeat += '- Reply HEARTBEAT_OK if nothing needs attention\n';
+            }
+
+            // 儲存
+            generatedFiles = {
+                identity: { content: identity, filename: 'IDENTITY.md' },
+                soul: { content: soul, filename: 'SOUL.md' },
+                user: { content: user, filename: 'USER.md' },
+                agents: { content: agents, filename: 'AGENTS.md' },
+                tools: { content: tools, filename: 'TOOLS.md' },
+                heartbeat: { content: heartbeat, filename: 'HEARTBEAT.md' }
+            };
+
+            // 更新預覽
+            document.getElementById('preview-identity').textContent = identity;
+            document.getElementById('preview-soul').textContent = soul;
+            document.getElementById('preview-user').textContent = user;
+            document.getElementById('preview-agents').textContent = agents;
+            document.getElementById('preview-tools').textContent = tools;
+            document.getElementById('preview-heartbeat').textContent = heartbeat;
+
+            // 顯示下載區
+            document.getElementById('download-section').classList.remove('hidden');
+        }
+
+        // ===== 下載單一檔案 =====
+        function downloadFile(type) {
+            if (!generatedFiles[type]) {
+                alert('請先點擊「生成全部檔案」！');
+                return;
+            }
+            var file = generatedFiles[type];
+            var blob = new Blob([file.content], { type: 'text/markdown;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = file.filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ===== 一鍵下載全部 =====
+        function downloadAllFiles() {
+            var types = ['identity', 'soul', 'user', 'agents', 'tools', 'heartbeat'];
+            types.forEach(function(type, index) {
+                setTimeout(function() { downloadFile(type); }, index * 400);
+            });
+        }
+    </script>
+</body>
+</html>
